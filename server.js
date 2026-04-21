@@ -1,25 +1,28 @@
 /** @format */
+
 require("dotenv").config();
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const twilio = require("twilio");
-
-const app = express();
 const path = require("path");
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
+const app = express(); 
+
+// Middleware
 app.use(bodyParser.json());
 app.use(cors());
 
-// 🔑 Twilio credentials (APNE DALNA)~
-const accountSid = "ACabe02b85e8e6d25e80a96c8282ce1523";
-const authToken = "c172143315f2173426e2a2c27943d488";
+app.use(express.static(__dirname));
+
+
+const accountSid = process.env.ACCOUNT_SID;
+const authToken = process.env.AUTH_TOKEN;
 
 const client = new twilio(accountSid, authToken);
 
+// API route
 app.post("/set-reminder", (req, res) => {
   const { medicine, time } = req.body;
 
@@ -46,7 +49,7 @@ app.post("/set-reminder", (req, res) => {
       .create({
         body: `Time to take ${medicine}`,
         from: "whatsapp:+14155238886",
-        to: "whatsapp:+918809454240",
+        to: "whatsapp:+91XXXXXXXXXX", // 👈 apna number daalo
       })
       .then(() => console.log("WhatsApp sent"))
       .catch((err) => console.log(err));
@@ -55,6 +58,7 @@ app.post("/set-reminder", (req, res) => {
   res.send("Reminder set");
 });
 
+// Server start
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
